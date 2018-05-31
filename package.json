@@ -11,6 +11,7 @@
     "cheerio": "^1.0.0-rc.2",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
+    "ejs": "^2.6.1",
     "express": "~4.15.5",
     "jade": "~1.11.0",
     "morgan": "~1.9.0",

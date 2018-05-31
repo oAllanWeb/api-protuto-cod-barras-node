@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8">
+	<title>Buscar Produto por código de barras</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
+	<style>
+		.none{
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<section class="section">
+		<div class="container">
+			<h1 class="title column is-11 is-offset-1 is-centered">Buscar Produto por código de barras</h1>
+
+			<div class="field has-addons column is-centered">
+				<div class="control">
+					<input id="barcode" class="input is-large" type="number" placeholder="código de barras">
+				</div>
+				<div class="control">
+					<a id="bt" class="button is-info is-large" onclick="buscar()">
+						Buscar
+					</a>
+				</div>
+			</div>
+			<article class="message none">
+				<div class="message-body">
+						
+				</div>
+			</article>
+		</div>
+		<div class="notification is-danger none">
+		  <button class="delete" onclick="$('.notification').addClass('none')"></button>
+		  <strong id="msg"></strong>
+		</div>
+	</section>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script>
+		function buscar() {
+			$('#bt').addClass('is-loading')
+			$('#bt').attr('disabled', 'disabled')
+			var barcode = String($('#barcode').val())
+			$.ajax({
+			  method: 'GET',
+			  url: '/produtos/'+barcode			  
+			}).done(function(res) {
+				$('#bt').removeClass('is-loading')
+				$('#bt').removeAttr('disabled')
+				if(res.status < 0){
+					$('#msg').html(res.msg)
+					$('.notification').removeClass('none')
+					setTimeout(() => {
+					  	$('.notification').addClass('none')
+					}, 10000)
+				}else{
+					$('.message-body').html('<code>'+JSON.stringify(res)+'</code>')
+					$('.message').removeClass("none")
+				}
+
+			})
+		}
+
+	</script>
+
+</body>
+</html>
