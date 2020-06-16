@@ -14,7 +14,7 @@
     "ejs": "^2.6.1",
     "express": "~4.15.5",
     "jade": "~1.11.0",
-    "morgan": "~1.9.0",
+    "morgan": "~1.9.1",
     "nodemon": "^1.12.1",
     "request": "^2.87.0",
     "serve-favicon": "~2.4.5"
