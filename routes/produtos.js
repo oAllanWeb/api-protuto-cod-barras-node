@@ -58,7 +58,7 @@ router.get('/:cod', (req, res, next) => {
           var obj = JSON.parse(str)
           obj.status = 1
           obj.nome=arr[1]
-          obj.codigo_barras=arr[5]
+          obj.codigo_barras=req.params.cod
           if(img){
             if (temImg[1] == "assets" ) {
               res.send(obj)
