@@ -1,85 +1,76 @@
 const express = require('express')
 const router = express.Router()
-const request = require('request')
+const puppeteer = require('puppeteer')
 const cheerio = require('cheerio')
-const  base64Img = require('base64-img');
 
+router.get('/:cod', async (req, res, next) => {
+  try {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36')
+    await page.goto('https://cosmos.bluesoft.com.br/produtos/'+req.params.cod)
+      const html = await page.content()
+      const $ = cheerio.load(html);
 
+      const arr =  $('h1.page-header').text().split('\n')
+      const v = $("dd.description").text().split('\n').filter((x)=>{ if(x!=""){return x}})
+      const p = $("dt").text().split('\n').filter((x)=>{ if(x!=""){return x}})
 
-/* GET users listing. */
-router.get('/:cod', (req, res, next) => {
-  if(Number(req.params.cod))
-    request('https://cosmos.bluesoft.com.br/produtos/'+req.params.cod, (error, response, html) => {
+      const img  = $(".product-thumbnail img").attr('src')
+      console.log(img)
+      const temImg = String(img).split("/")
+      console.log(temImg)
 
-      if(!error){
-        const $ = cheerio.load(html);
+      if(arr[1]){
+        var txt = ''
+        var str = '{'
 
-        const arr =  $('h1.page-header').text().split('\n')
-        const v = $("dd.description").text().split('\n').filter((x)=>{ if(x!=""){return x}})
-        const p = $("dt").text().split('\n').filter((x)=>{ if(x!=""){return x}})
+        for (var i = 0; i < p.length; i++) {
 
-        const img  = $(".product-thumbnail img").attr('src')
-        console.log(img)
-        const temImg = String(img).split("/")
+          switch (p[i]) {
+            case 'País de Registro:':
+            txt += ',"pais":"'+v[i]+'"'
+            break;
+            case 'Categoria (GPC):':
+            txt += ',"categoria":"'+v[i]+'"'
+            break;
+            case 'Marca:':
+            txt += ',"marca":"'+v[i]+'"'
+            break;
+            case 'Fabricante:':
+            txt += ',"fabricante":"'+v[i]+'"'
+            break;
+            case 'Distribuidores:':
+            txt += ',"distribuidores":"'+v[i]+'"'
+            break;
 
-
-        if(arr[1]){
-          var txt = ''
-          var str = '{'
-
-          for (var i = 0; i < p.length; i++) {
-
-            switch (p[i]) {
-              case 'País de Registro:':
-              txt += ',"pais":"'+v[i]+'"'
-              break;
-              case 'Categoria (GPC):':
-              txt += ',"categoria":"'+v[i]+'"'
-              break;
-              case 'Marca:':
-              txt += ',"marca":"'+v[i]+'"'
-              break;
-              case 'Fabricante:':
-              txt += ',"fabricante":"'+v[i]+'"'
-              break;
-              case 'Distribuidores:':
-              txt += ',"distribuidores":"'+v[i]+'"'
-              break;
-
-              
-            }
-            
             
           }
-          
-          
-          str += txt.substring(1)
-          str+='}'
-          var obj = JSON.parse(str)
-          obj.status = 1
-          obj.nome = arr[1]
-          obj.codigo_barras = req.params.cod
-          if(img){
-            if (temImg[1] == "assets" ) {
-              res.send(obj)
-            }else{
-              base64Img.requestBase64(img, function(erro, resu, body) {
-                obj.img = body
-                res.send(obj)
-              })
-            }
-          }else{
-            res.send(obj)
-          }
-          
-        }else{
-          res.send({status:-1, msg:"Código de barras inválido"})
         }
-      }
-    })
-  else
+        str += txt.substring(1)
+        str+='}'
+        var obj = JSON.parse(str)
+        obj.status = 1
+        obj.nome = arr[1]
+        obj.codigo_barras = req.params.cod
+        if(img){
+          if (temImg[1] == "assets" ) {
+            res.send(obj)
+          }else{
+              obj.img = img
+              res.send(obj)
+          }
+        }else{
+          res.send(obj)
+        }
+        
+      }else{
+        res.send({status:-1, msg:"Código de barras inválido"})
+      }      
+  } catch (error) { 
     res.send({status:-1, msg:"Código de barras inválido"});
-
+  }
+  
 })
 router.get('/', (req, res, next) => {
   res.send({status:-1, msg:"Código de barras inválido"});
